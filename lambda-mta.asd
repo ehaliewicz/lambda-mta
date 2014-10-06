@@ -11,6 +11,5 @@
                (:file "cps")
                (:file "closure")
                (:file "codegen")
-               (:file "shell")
-               (:file "gen-binary")))
+               (:file "shell")))
 

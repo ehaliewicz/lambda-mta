@@ -32,28 +32,33 @@
   str) ;; string representation
 
 
-;; recursively parse into ast structs
 (defun expr->ast (expr)
-  (labels ((recur (expr env) ;; sexpr, (list of symbols)
-             (etypecase expr
-               (symbol (if (assoc expr env :test 'eql)
-                           (cdr (assoc expr env :test 'eql))
-                           (error "Unbound symbol at compile-time: ~a" expr)))
-               
-               (list (destructuring-bind (operator &rest operands) expr
-                       (case operator
-                         ;; lambda expression
-                         (lambda (destructuring-bind (lambda (arg) body) expr
-                              (declare (ignore lambda))
-                              (let ((arg-sym (make-sym :name arg)))
-                                (make-func
-                                 :args (list arg-sym)
-                                 :body (recur body
-                                              (cons (cons arg arg-sym) env))
-                                 :str expr))))
-                         ;; application
-                         (otherwise
-                          (make-app
-                           :operator (recur operator env)
-                           :operand (recur (car operands) env)))))))))
-    (recur expr (list))))
+  (astify expr (list)))
+
+
+(defgeneric astify (expr env)
+  (:documentation "Parses the given sexpr into an AST."))
+
+(defmethod astify ((expr symbol) (env list))
+  (if (assoc expr env :test 'eql)
+      (cdr (assoc expr env :test 'eql))
+      (error "Unbound symbol at compile-time: ~a" expr)))
+
+
+(defmethod astify ((expr list) (env list))
+  (destructuring-bind (operator &rest operands) expr
+    (case operator
+      ;; lambda expression
+      (lambda (destructuring-bind (lambda (arg) body) expr
+           (declare (ignore lambda))
+           (let ((arg-sym (make-sym :name arg)))
+             (make-func
+              :args (list arg-sym)
+              :body (recur body
+                           (cons (cons arg arg-sym) env))
+              :str expr))))
+      ;; application
+      (otherwise
+       (make-app
+        :operator (recur operator env)
+        :operand (recur (car operands) env))))))
