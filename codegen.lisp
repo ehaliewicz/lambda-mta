@@ -509,9 +509,11 @@ Returns (values lines-of-declaration-text, value-text, memory-allocated-for-expr
                *perform-calls-needed*))
     ;; generate the function pointer typedef for this function
   (generate-fp-typedef num-args)
-  (push (emit nil "void ~a(~{~a~^, ~});" func-sym
+  (push (emit nil "void ~a(~{~a~^, ~}) __attribute__ ((noreturn));" func-sym
               (loop for i below num-args collect "clos*"))
         *forward-declarations*))
+
+
 
 ;; maps number of args+freevars to function pointer typedef declarations
 (defvar *typedef-table*)

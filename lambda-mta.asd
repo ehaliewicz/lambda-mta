@@ -10,6 +10,5 @@
                (:file "ast")
                (:file "cps")
                (:file "closure")
-               (:file "codegen")
-               (:file "shell")))
+               (:file "codegen")))
 
