@@ -8,11 +8,13 @@
 ;; so stack allocated objects survive function boundaries
 
 ;; when the soft stack limit is hit,
-;; all accessible objects (just arguments for the current function)
-;; are copied to the heap,
-;; we save a pointer to the current function (along with copied arguments),
+;; a garbage collection cycle is triggered
+;; with the roots being the arguments to the current function
+
+;; we save a pointer to the current function
+;; (along with copied arguments) to a static location,
 ;; return to the trampoline via longjmp
-;; wiping out the C stack and all dead objects
+;; wiping out the C stack and all stack allocated objects
 ;; and resume the paused function
 
 (in-package #:lambda-mta)
