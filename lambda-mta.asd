@@ -10,5 +10,9 @@
                (:file "ast")
                (:file "cps")
                (:file "closure")
-               (:file "codegen")))
+               (:module codegen
+                        :serial t
+                        :components
+                        ((:file "c")
+                         (:file "llvm")))))
 
