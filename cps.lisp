@@ -6,7 +6,7 @@
 (in-package #:lambda-mta)
 
 (defun ast->cps (ast)
-  (cps-c ast (make-sym :name "halt")))
+  (cps-c ast (make-sym :name 'halt)))
 
 (defgeneric cps-c (ast cont)
   (:documentation "Performs standard CPS transform on ast."))
@@ -22,7 +22,7 @@
 (defmethod cps-c ((ast sym) (cont sym))
   ;; apply cont to symbol
   (make-app :operator cont
-            :operand ast))
+            :operand (atomic->cps ast)))
 
 
 (defmethod cps-c ((ast app) (cont sym))
@@ -41,10 +41,10 @@
   (:documentation "Performs higher-order CPS transform on ast."))
 
 (defmethod cps-k ((ast func) (cont function))
-  (funcall cont ast))
+  (funcall cont (atomic->cps ast)))
 
 (defmethod cps-k ((ast sym) (cont function))
-  (funcall cont ast))
+  (funcall cont (atomic->cps ast)))
 
 (defmethod cps-k ((ast app) (cont function))
   (with-slots (operator operand) ast
@@ -80,6 +80,9 @@
                  ;; functions generated in the CPS transformation do not
                  ;; keep a string representation
                  :str (prin1-to-string str)))))
+
+(defmethod atomic->cps ((ast sym))
+  ast)
 
 
 

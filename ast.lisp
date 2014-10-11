@@ -13,7 +13,7 @@
   operand)
 
 ;; two-operand application
-;; (exists to simplify code generation of single-operand applications)
+;; (exists to simplify processing of single-operand applications)
 (defstruct multi-app
   operator
   operands)
@@ -54,11 +54,46 @@
            (let ((arg-sym (make-sym :name arg)))
              (make-func
               :args (list arg-sym)
-              :body (recur body
+              :body (astify body
                            (cons (cons arg arg-sym) env))
               :str expr))))
       ;; application
       (otherwise
        (make-app
-        :operator (recur operator env)
-        :operand (recur (car operands) env))))))
+        :operator (astify operator env)
+        :operand (astify (car operands) env))))))
+
+
+;; pretty-print ast
+(defgeneric pretty-print (expr))
+
+(defvar *out* t)
+
+(defmethod pretty-print ((expr sym))
+  (sym-name expr))
+
+(defmethod pretty-print ((expr func))
+  (with-slots (args body) expr
+    `(lambda ,(mapcar #'pretty-print args)
+       ,(pretty-print body))))
+
+(defmethod pretty-print ((expr app))
+  (with-slots (operator operand) expr
+      `(,(pretty-print operator)
+        ,(pretty-print operand))))
+
+
+(defmethod pretty-print ((expr multi-app))
+  (with-slots (operator operands) expr
+    (destructuring-bind (operand-a operand-b) operands
+      `(,(pretty-print operator)
+         ,(pretty-print operand-a)
+         ,(pretty-print operand-b)))))
+
+(defmethod pretty-print ((expr closure))
+  (with-slots (freevars args body) expr
+    (if freevars
+        `(lambda ,(mapcar #'pretty-print args)
+           (:bound ,@(mapcar #'pretty-print freevars))
+           ,(pretty-print body))
+        (pretty-print (make-func :args args :body body)))))
