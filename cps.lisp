@@ -6,7 +6,7 @@
 (in-package #:lambda-mta)
 
 (defun ast->cps (ast)
-  (cps-c ast (make-sym :name 'halt)))
+  (cps-c ast (make-sym :name "halt")))
 
 (defgeneric cps-c (ast cont)
   (:documentation "Performs standard CPS transform on ast."))
