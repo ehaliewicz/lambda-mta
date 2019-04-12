@@ -1,3 +1,9 @@
-(lambda (x)
-   (lambda (y) (x y)))
+(((lambda (x)
+     (lambda (y) (x y)))
+   (lambda (x)
+     (lambda (y) (y x))))
+ ((lambda (x)
+     (lambda (y) (x y)))
+   (lambda (x)
+     (lambda (y) (y x)))))
 
